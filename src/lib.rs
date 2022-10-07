@@ -69,7 +69,7 @@ impl Contract {
         let initial_storage_usage = env::storage_usage();
         let sender_id = env::predecessor_account_id();
         match &campaign.deposit {
-            DepositInput::FT(v) => assert!(v.1.0 > campaign.claim_amount.0, "not enough token"),
+            DepositInput::FT(v) => assert!(v.1.0 >= campaign.claim_amount.0, "not enough token"),
             DepositInput::NFT(v) => unimplemented!(),
         }
         let hash = get_hash(campaign.clone());
