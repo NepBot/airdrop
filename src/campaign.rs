@@ -15,7 +15,7 @@ pub struct CampaignInfo {
     end_time: U64,
     left_amount: U128,
     total_amount: U128,
-    claim_amount: u128,
+    claim_amount: U128,
     claimed_count: u32
 }
 
@@ -119,10 +119,10 @@ impl Campaign {
         let sender_id = env::predecessor_account_id();
         match &self.deposit {
             Deposit::FT(v) => {
-                if v.amount / self.claim_amount >= self.claimed_accounts.len() as u128 {
+                if v.amount / self.claim_amount <= self.claimed_accounts.len() as u128 {
                     return Err("closed".into())
                 }
-                ext_ft_core::ext(v.contract_id.clone()).with_unused_gas_weight(6).ft_transfer(sender_id.clone(), self.claim_amount.into(), None).then(
+                ext_ft_core::ext(v.contract_id.clone()).with_attached_deposit(1).with_unused_gas_weight(6).ft_transfer(sender_id.clone(), self.claim_amount.into(), None).then(
                     Contract::ext(env::current_account_id()).on_claim(self.hash, user_id)
                 );
             }
@@ -139,14 +139,14 @@ impl Campaign {
 
     pub fn redeem(&mut self) -> Result<(), String> {
 
-        if self.end_time > env::block_timestamp() {
-            return Err("still open".into())
-        }
+        // if self.end_time > env::block_timestamp() {
+        //     return Err("still open".into())
+        // }
 
         match &self.deposit {
             Deposit::FT(v) => {
                 let amount = v.amount - self.claimed_accounts.len() as u128 * self.claim_amount;
-                ext_ft_core::ext(v.contract_id.clone()).with_unused_gas_weight(6).ft_transfer(self.owner_id.clone(), amount.into(), None).then(
+                ext_ft_core::ext(v.contract_id.clone()).with_attached_deposit(1).with_unused_gas_weight(6).ft_transfer(self.owner_id.clone(), amount.into(), None).then(
                     Contract::ext(env::current_account_id()).on_redeem(self.hash)
                 );
             }
@@ -185,7 +185,7 @@ impl Campaign {
             end_time: self.end_time.into(),
             left_amount: self.get_left_amount().into(),
             total_amount: self.get_total_amount().into(),
-            claim_amount: self.claim_amount,
+            claim_amount: self.claim_amount.into(),
             claimed_count: self.claimed_accounts.len() as u32,
         }
     }
