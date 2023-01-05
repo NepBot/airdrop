@@ -11,6 +11,7 @@ pub struct CampaignInfo {
     owner_id: AccountId,
     guild_id: String,
     role_ids: Vec<String>,
+    deposit: Deposit,
     start_time: U64,
     end_time: U64,
     left_amount: U128,
@@ -19,14 +20,14 @@ pub struct CampaignInfo {
     claimed_count: u32
 }
 
-#[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize, Clone)]
+#[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize, Clone, Debug)]
 #[serde(crate = "near_sdk::serde")]
 pub enum Deposit {
     FT(FT),
     NFT(NFT)
 }
 
-#[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize, Clone)]
+#[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize, Clone, Debug)]
 #[serde(crate = "near_sdk::serde")]
 pub struct FT {
     pub contract_id: AccountId,
@@ -34,7 +35,7 @@ pub struct FT {
     pub amount: u128
 }
 
-#[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize, Clone)]
+#[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize, Clone, Debug)]
 #[serde(crate = "near_sdk::serde")]
 pub struct NFT {
     pub contract_id: AccountId,
@@ -181,6 +182,7 @@ impl Campaign {
             owner_id: self.owner_id.clone(),
             guild_id: self.guild_id.clone(),
             role_ids: self.role_ids.clone(),
+            deposit: self.deposit.clone(),
             start_time: self.start_time.into(),
             end_time: self.end_time.into(),
             left_amount: self.get_left_amount().into(),
